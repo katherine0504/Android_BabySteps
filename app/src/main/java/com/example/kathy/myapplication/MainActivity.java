@@ -30,12 +30,13 @@ public class MainActivity extends AppCompatActivity {
     public int month, date, year;
     public int moodMode = 0;
     private int outdoorMode = 0, sleepMode = 0, poopMode = 0, foodMode = 0, milkMode = 0;
-    private String outdoor, sleep, poop, food, milk;
+    private String outdoor, sleep, poop, food, milk, mood;
+    private String outdoorTime, sleepTime, foodTime, milkTime, poopTime;
     private TextView txtWakeTime, txtBedTime, setMonth, setDate, txtMilkInfo, txtFoodInfo, txtPoopInfo, txtSleepInfo, txtOutdoorInfo, txtBathInfo;
     private ImageView imgDay, imgNight, imgMilk, imgFood, imgPoop, imgSleep, imgOutdoor, imgBath;
     private ImageSwitcher moodSwitcher;
-    //private EditText edtColor, edtShape;
     private int mHour, mMinute;
+    private SQLiteImplement database;
 
 
     @Override
@@ -64,8 +65,6 @@ public class MainActivity extends AppCompatActivity {
 
         moodSwitcher = (ImageSwitcher) findViewById(R.id.mood);
 
-
-
         imgDay.setOnClickListener(pickDayTime);
         imgNight.setOnClickListener(pickNightTime);
         imgMilk.setOnClickListener(pickMilkTime);
@@ -75,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
         imgOutdoor.setOnClickListener(pickOutdoorTime);
         imgBath.setOnClickListener(pickBathTime);
 
+        database = new SQLiteImplement(this);
+        
         moodSwitcher.setFactory(new ViewSwitcher.ViewFactory() {
             @Override
             public View makeView() {
@@ -88,6 +89,112 @@ public class MainActivity extends AppCompatActivity {
         getCurrentDate();
     }
 
+    public void saveMood(String Date, String mood) {
+        Data temp;
+        for (long i = 1; i <= database.getCount(); i++) {
+            temp = database.getData(i);
+            if (temp.getDate() != null) {
+                if (temp.getDate().equals(Date)) {
+                    if (temp.getEvent().equals("mood")) {
+                        temp.setMark(mood);
+                        database.updateData(temp);
+                        return;
+                    }
+                }
+            }
+        }
+        Data test1 = new Data("mood", Date, null, mood);
+        database.insertData(test1);
+    }
+
+    public void saveWakeTime(String Date, String time) {
+        Data temp;
+        for (long i = 1; i <= database.getCount(); i++) {
+            temp = database.getData(i);
+            if (temp.getDate() != null) {
+                if (temp.getDate().equals(Date)) {
+                    if (temp.getEvent().equals("wake up time")) {
+                        temp.setMark(time);
+                        database.updateData(temp);
+                        return;
+                    }
+                }
+            }
+        }
+        Data test1 = new Data("wake up time", Date, null, time);
+        database.insertData(test1);
+    }
+
+    public void saveBedTime(String Date, String time) {
+        Data temp;
+        for (long i = 1; i <= database.getCount(); i++) {
+            temp = database.getData(i);
+            if (temp.getDate() != null) {
+                if (temp.getDate().equals(Date)) {
+                    if (temp.getEvent().equals("bed time")) {
+                        temp.setMark(time);
+                        database.updateData(temp);
+                        return;
+                    }
+                }
+            }
+        }
+        Data test1 = new Data("bed time", Date, null, time);
+        database.insertData(test1);
+    }
+
+    public void saveBathTime(String Date, String time) {
+        Data temp;
+        for (long i = 1; i <= database.getCount(); i++) {
+            temp = database.getData(i);
+            if (temp.getDate() != null) {
+                if (temp.getDate().equals(Date)) {
+                    if (temp.getEvent().equals("bath time")) {
+                        temp.setMark(time);
+                        database.updateData(temp);
+                        return;
+                    }
+                }
+            }
+        }
+        Data test1 = new Data("bath time", Date, null, time);
+        database.insertData(test1);
+    }
+
+    public void saveSleepTime(String Date, String time) {
+        Data temp;
+        for (long i = 1; i <= database.getCount(); i++) {
+            temp = database.getData(i);
+            if (temp.getDate() != null) {
+                if (temp.getDate().equals(Date)) {
+                    if (temp.getEvent().equals("napTmp")) {
+                        database.deleteData(i);
+                        break;
+                    }
+                }
+            }
+        }
+        Data test1 = new Data("sleep", Date, null, time);
+        database.insertData(test1);
+    }
+
+    public void saveOutdoorTime(String EventItem, String Date, String time) {
+        Data temp;
+        for (long i = 1; i <= database.getCount(); i++) {
+            temp = database.getData(i);
+            if (temp.getDate() != null) {
+                if (temp.getDate().equals(Date)) {
+                    if (temp.getEvent().equals(EventItem)) {
+                        database.deleteData(i);
+                        break;
+                    }
+                }
+            }
+        }
+        Data test1 = new Data("outdoor", Date, null, time);
+        database.insertData(test1);
+    }
+
     public void nextMood (View view)
     {
         Animation in = AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left);
@@ -98,23 +205,24 @@ public class MainActivity extends AppCompatActivity {
         {
             case 0:
                 moodSwitcher.setImageResource(R.drawable.mood_angry);
-                moodMode ++; break;
+                mood = "angry"; moodMode ++; break;
             case 1:
                 moodSwitcher.setImageResource(R.drawable.mood_sad);
-                moodMode ++; break;
+                mood = "sad"; moodMode ++; break;
             case 2:
                 moodSwitcher.setImageResource(R.drawable.mood_worried);
-                moodMode ++; break;
+                mood = "worried"; moodMode ++; break;
             case 3:
                 moodSwitcher.setImageResource(R.drawable.mood_sick);
-                moodMode++; break;
+                mood = "sick"; moodMode++; break;
             case 4:
                 moodSwitcher.setImageResource(R.drawable.mood_happy);
-                moodMode=0; break;
+                mood = "happy"; moodMode=0; break;
             default:
                 moodSwitcher.setImageResource(R.drawable.mood_happy);
-                moodMode=0; break;
+                mood = "happy"; moodMode=0; break;
         }
+        saveMood(year+"/"+month+"/"+date,mood);
 
     }
 
@@ -124,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
         Calendar cal = Calendar.getInstance();
         year = cal.get(Calendar.YEAR);
         month = cal.get(Calendar.MONTH);
-        date = cal.get(Calendar.DATE);
+        date = cal.get(Calendar.DATE)+1;
 
         Log.d("Date Error", String.valueOf(month));
 
@@ -140,18 +248,18 @@ public class MainActivity extends AppCompatActivity {
 
         switch (month)
         {
-            case 0: return "January";
-            case 1: return "February";
-            case 2: return "March";
-            case 3: return "April";
-            case 4: return "May";
-            case 5: return "June";
-            case 6: return "July";
-            case 7: return "August";
-            case 8: return "September";
-            case 9: return "October";
-            case 10: return "November";
-            case 11: return "December";
+            case 1: return "January";
+            case 2: return "February";
+            case 3: return "March";
+            case 4: return "April";
+            case 5: return "May";
+            case 6: return "June";
+            case 7: return "July";
+            case 8: return "August";
+            case 9: return "September";
+            case 10: return "October";
+            case 11: return "November";
+            case 12: return "December";
             default: return "error";
         }
     }
@@ -174,6 +282,8 @@ public class MainActivity extends AppCompatActivity {
                                               int minute) {
 
                             txtWakeTime.setText(toZeroZero(hourOfDay) + ":" + toZeroZero(minute));
+                            saveWakeTime(year+"/"+month+"/"+date,toZeroZero(hourOfDay) + ":" + toZeroZero(minute));
+
                         }
                     }, mHour, mMinute, false);
             timePickerDialog.show();
@@ -198,6 +308,7 @@ public class MainActivity extends AppCompatActivity {
                                               int minute) {
 
                             txtBedTime.setText(toZeroZero(hourOfDay) + ":" + toZeroZero(minute));
+                            saveBedTime(year+"/"+month+"/"+date,toZeroZero(hourOfDay) + ":" + toZeroZero(minute));
                         }
                     }, mHour, mMinute, false);
             timePickerDialog.show();
@@ -222,9 +333,10 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay,
                                                   int minute) {
-                                milk = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  " ;
-                                txtMilkInfo.setText(milk);
+                                milkTime = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  " ;
+                                txtMilkInfo.setText(milkTime);
                                 milkMode++;
+                                Log.d("__MILKMODE__",String.valueOf(milkMode));
                             }
                         }, mHour, mMinute, false);
                 timePickerDialog.show();
@@ -245,9 +357,15 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int id) {
                                 Dialog d = (Dialog) dialog;
                                 EditText edtMilkAmount = (EditText) d.findViewById(R.id.milkAmountInfo);
-                                milk = milk + "   " + edtMilkAmount.getText().toString() + " mL";
+                                if (milk!=null)
+                                    milk = milk + milkTime + "   " + edtMilkAmount.getText().toString() + " mL\n";
+                                else
+                                    milk = milkTime + "   " + edtMilkAmount.getText().toString() + " mL\n";
                                 txtMilkInfo.setText(milk);
-                                milkMode = 0;
+                                Data data1 = new Data("milk", year+"/"+month+"/"+date, milkTime, edtMilkAmount.getText().toString() + " mL");
+                                data1 = database.insertData(data1);
+                                milkMode++;
+                                Log.d("__MILKMODE__", String.valueOf(milkMode));
                             }
                         })
                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -257,6 +375,22 @@ public class MainActivity extends AppCompatActivity {
                         });
                 builder.create();
                 builder.show();
+            }
+            else if (milkMode==2)
+            {
+                TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this,
+                        new TimePickerDialog.OnTimeSetListener() {
+
+                            @Override
+                            public void onTimeSet(TimePicker view, int hourOfDay,
+                                                  int minute) {
+                                milkTime = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  " ;
+                                txtMilkInfo.setText(milk+milkTime);
+                                milkMode = 1;
+                                Log.d("__MILKMODE__", String.valueOf(milkMode));
+                            }
+                        }, mHour, mMinute, false);
+                timePickerDialog.show();
             }
         }
     };
@@ -279,8 +413,8 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay,
                                                   int minute) {
-                                food = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  " ;
-                                txtFoodInfo.setText(food);
+                                foodTime = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  " ;
+                                txtFoodInfo.setText(foodTime);
                                 foodMode++;
                             }
                         }, mHour, mMinute, false);
@@ -303,9 +437,14 @@ public class MainActivity extends AppCompatActivity {
                                 Dialog d = (Dialog) dialog;
                                 EditText edtFood = (EditText) d.findViewById(R.id.foodTypeInfo);
                                 EditText edtFoodAmount = (EditText) d.findViewById(R.id.foodAmountInfo);
-                                food = food + edtFoodAmount.getText().toString() + " of " + edtFood.getText().toString();
+                                if (food!=null)
+                                    food = food + foodTime + edtFoodAmount.getText().toString() + " of " + edtFood.getText().toString() + "\n";
+                                else
+                                    food = foodTime + edtFoodAmount.getText().toString() + " of " + edtFood.getText().toString() + "\n";
                                 txtFoodInfo.setText(food);
-                                foodMode = 0;
+                                Data data1 = new Data("food", year+"/"+month+"/"+date, foodTime, edtFoodAmount.getText().toString() + " of " + edtFood.getText().toString());
+                                data1 = database.insertData(data1);
+                                foodMode++;
                             }
                         })
                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -315,6 +454,23 @@ public class MainActivity extends AppCompatActivity {
                         });
                 builder.create();
                 builder.show();
+            }
+
+            else if (foodMode==2)
+            {
+                // Launch Time Picker Dialog
+                TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this,
+                        new TimePickerDialog.OnTimeSetListener() {
+
+                            @Override
+                            public void onTimeSet(TimePicker view, int hourOfDay,
+                                                  int minute) {
+                                foodTime = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  " ;
+                                txtFoodInfo.setText(food+foodTime);
+                                foodMode=1;
+                            }
+                        }, mHour, mMinute, false);
+                timePickerDialog.show();
             }
         }
     };
@@ -337,8 +493,8 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onTimeSet(TimePicker view, int hourOfDay,
                                                   int minute) {
-                                poop = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  " ;
-                                txtPoopInfo.setText(poop);
+                                poopTime = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  " ;
+                                txtPoopInfo.setText(poopTime);
                                 poopMode++;
                             }
                         }, mHour, mMinute, false);
@@ -361,9 +517,14 @@ public class MainActivity extends AppCompatActivity {
                                 Dialog d = (Dialog) dialog;
                                 EditText edtColor = (EditText) d.findViewById(R.id.colorInfo);
                                 EditText edtShape = (EditText) d.findViewById(R.id.shapeInfo);
-                                poop = poop + edtColor.getText().toString() + "  " + edtShape.getText().toString();
+                                if (poop!=null)
+                                    poop = poop + poopTime + edtColor.getText().toString() + "  " + edtShape.getText().toString() + "\n";
+                                else
+                                    poop = poopTime + edtColor.getText().toString() + "  " + edtShape.getText().toString() + "\n";
+                                Data data1 = new Data("stool", year+"/"+month+"/"+date, poopTime, edtColor.getText().toString() + "  " + edtShape.getText().toString());
+                                data1 = database.insertData(data1);
                                 txtPoopInfo.setText(poop);
-                                poopMode = 0;
+                                poopMode++;
                             }
                         })
                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -373,6 +534,23 @@ public class MainActivity extends AppCompatActivity {
                         });
                 builder.create();
                 builder.show();
+            }
+
+            else if (poopMode==2)
+            {
+                // Launch Time Picker Dialog
+                TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this,
+                        new TimePickerDialog.OnTimeSetListener() {
+
+                            @Override
+                            public void onTimeSet(TimePicker view, int hourOfDay,
+                                                  int minute) {
+                                poopTime = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  " ;
+                                txtPoopInfo.setText(poop+poopTime);
+                                poopMode=1;
+                            }
+                        }, mHour, mMinute, false);
+                timePickerDialog.show();
             }
         }
     };
@@ -396,15 +574,30 @@ public class MainActivity extends AppCompatActivity {
 
                             if (sleepMode==0)
                             {
-                                sleep = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  ~  " ;
-                                txtSleepInfo.setText(sleep);
+                                sleepTime = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  ~  " ;
+                                txtSleepInfo.setText(sleepTime);
+                                Data data1 = new Data("napTmp", year+"/"+month+"/"+date, null, sleepTime);
+                                data1 = database.insertData(data1);
                                 sleepMode++;
                             }
                             else if (sleepMode==1)
                             {
-                                sleep = sleep + toZeroZero(hourOfDay) + ":" + toZeroZero(minute);
+                                sleepTime = sleepTime + toZeroZero(hourOfDay) + ":" + toZeroZero(minute);
+                                if (sleep!=null)
+                                    sleep = sleep + sleepTime + "\n";
+                                else
+                                    sleep = sleepTime + "\n";
                                 txtSleepInfo.setText(sleep);
-                                sleepMode=0;
+                                saveSleepTime("napTmp", sleepTime);
+                                sleepMode++;
+                            }
+                            else if (sleepMode==2)
+                            {
+                                sleepTime = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  ~  " ;
+                                txtSleepInfo.setText(sleep + sleepTime);
+                                Data data1 = new Data("napTmp", year+"/"+month+"/"+date, null, sleepTime);
+                                data1 = database.insertData(data1);
+                                sleepMode=1;
                             }
                         }
                     }, mHour, mMinute, false);
@@ -431,23 +624,31 @@ public class MainActivity extends AppCompatActivity {
 
                             if (outdoorMode==0)
                             {
-                                outdoor = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  ~  " ;
-                                txtOutdoorInfo.setText(outdoor);
+                                outdoorTime = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  ~  " ;
+                                txtOutdoorInfo.setText(outdoorTime);
+                                Data data1 = new Data("outdoorTmp", year+"/"+month+"/"+date, null, outdoorTime);
+                                data1 = database.insertData(data1);
                                 outdoorMode++;
                             }
                             else if (outdoorMode==1)
                             {
-                                outdoor = outdoor+ toZeroZero(hourOfDay) + ":" + toZeroZero(minute);
-                                txtOutdoorInfo.setText(outdoor);
-                                outdoorMode=0;
+                                outdoorTime = outdoorTime + toZeroZero(hourOfDay) + ":" + toZeroZero(minute);
+                                if (outdoor!=null)
+                                    outdoor = outdoor + outdoorTime + "\n" ;
+                                else
+                                    outdoor = outdoorTime + "\n" ;
+                                    txtOutdoorInfo.setText(outdoor);
+                                saveOutdoorTime("outdoorTmp", year+"/"+month+"/"+date, outdoorTime);
+                                outdoorMode++;
                             }
-
-                            /*else if (outdoorMode==2)
+                            else if (outdoorMode==2)
                             {
-                                outdoor = outdoor + "\n" + toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  ~  " ;
-                                txtOutdoorInfo.setText(outdoor);
+                                outdoorTime = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  ~  " ;
+                                txtOutdoorInfo.setText(outdoor+outdoorTime);
+                                Data data1 = new Data("outdoorTmp", year+"/"+month+"/"+date, null, outdoorTime);
+                                data1 = database.insertData(data1);
                                 outdoorMode=1;
-                            }*/
+                            }
 
                         }
                     }, mHour, mMinute, false);
@@ -473,6 +674,7 @@ public class MainActivity extends AppCompatActivity {
                                               int minute) {
 
                             txtBathInfo.setText(toZeroZero(hourOfDay) + ":" + toZeroZero(minute));
+                            saveBathTime(year+"/"+month+"/"+date,toZeroZero(hourOfDay) + ":" + toZeroZero(minute));
                         }
                     }, mHour, mMinute, false);
             timePickerDialog.show();
