@@ -30,10 +30,10 @@ public class MainActivity extends AppCompatActivity {
     public int month, date, year;
     public int moodMode = 0;
     private int outdoorMode = 0, sleepMode = 0, poopMode = 0, foodMode = 0, milkMode = 0;
-    private String outdoor, sleep, poop, food, milk, mood;
+    private String outdoor, sleep, poop, food, milk, mood, other;
     private String outdoorTime, sleepTime, foodTime, milkTime, poopTime;
-    private TextView txtWakeTime, txtBedTime, setMonth, setDate, txtMilkInfo, txtFoodInfo, txtPoopInfo, txtSleepInfo, txtOutdoorInfo, txtBathInfo;
-    private ImageView imgDay, imgNight, imgMilk, imgFood, imgPoop, imgSleep, imgOutdoor, imgBath;
+    private TextView txtWakeTime, txtBedTime, setMonth, setDate, txtMilkInfo, txtFoodInfo, txtPoopInfo, txtSleepInfo, txtOutdoorInfo, txtBathInfo, txtOtherInfo;
+    private ImageView imgDay, imgNight, imgMilk, imgFood, imgPoop, imgSleep, imgOutdoor, imgBath, imgOther;
     private ImageSwitcher moodSwitcher;
     private int mHour, mMinute;
     private SQLiteImplement database;
@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         txtSleepInfo = (TextView) findViewById(R.id.sleepInfo);
         txtOutdoorInfo = (TextView) findViewById(R.id.outdoorInfo);
         txtBathInfo = (TextView) findViewById(R.id.bathInfo);
+        txtOtherInfo = (TextView) findViewById(R.id.othersInfo) ;
 
         imgDay = (ImageView) findViewById(R.id.day);
         imgNight = (ImageView) findViewById(R.id.night);
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
         imgSleep = (ImageView) findViewById(R.id.sleep);
         imgOutdoor = (ImageView) findViewById(R.id.outdoor);
         imgBath = (ImageView) findViewById(R.id.bath);
+        imgOther = (ImageView) findViewById(R.id.others);
 
         moodSwitcher = (ImageSwitcher) findViewById(R.id.mood);
 
@@ -73,9 +75,10 @@ public class MainActivity extends AppCompatActivity {
         imgSleep.setOnClickListener(pickSleepTime);
         imgOutdoor.setOnClickListener(pickOutdoorTime);
         imgBath.setOnClickListener(pickBathTime);
+        imgOther.setOnClickListener(writeOthers);
 
         database = new SQLiteImplement(this);
-        
+
         moodSwitcher.setFactory(new ViewSwitcher.ViewFactory() {
             @Override
             public View makeView() {
@@ -84,9 +87,10 @@ public class MainActivity extends AppCompatActivity {
                 return myView;
             }
         });
-        moodSwitcher.setImageResource(R.drawable.mood_happy);
+        moodSwitcher.setImageResource(R.drawable.mood_default);
 
         getCurrentDate();
+        readData(year+"/"+month+"/"+date);
     }
 
     public void saveMood(String Date, String mood) {
@@ -161,20 +165,22 @@ public class MainActivity extends AppCompatActivity {
         database.insertData(test1);
     }
 
-    public void saveSleepTime(String Date, String time) {
+    public void saveSleepTime(String EventItem, String Date, String time) {
         Data temp;
         for (long i = 1; i <= database.getCount(); i++) {
             temp = database.getData(i);
             if (temp.getDate() != null) {
                 if (temp.getDate().equals(Date)) {
-                    if (temp.getEvent().equals("napTmp")) {
-                        database.deleteData(i);
-                        break;
+                    if (temp.getEvent().equals(EventItem)) {
+                        temp.setEvent("nap time");
+                        temp.setMark(time);
+                        database.updateData(temp);
+                        return;
                     }
                 }
             }
         }
-        Data test1 = new Data("sleep", Date, null, time);
+        Data test1 = new Data(EventItem, Date, null, time);
         database.insertData(test1);
     }
 
@@ -204,8 +210,8 @@ public class MainActivity extends AppCompatActivity {
         switch (moodMode)
         {
             case 0:
-                moodSwitcher.setImageResource(R.drawable.mood_angry);
-                mood = "angry"; moodMode ++; break;
+                moodSwitcher.setImageResource(R.drawable.mood_happy);
+                mood = "happy"; moodMode ++; break;
             case 1:
                 moodSwitcher.setImageResource(R.drawable.mood_sad);
                 mood = "sad"; moodMode ++; break;
@@ -216,11 +222,11 @@ public class MainActivity extends AppCompatActivity {
                 moodSwitcher.setImageResource(R.drawable.mood_sick);
                 mood = "sick"; moodMode++; break;
             case 4:
-                moodSwitcher.setImageResource(R.drawable.mood_happy);
-                mood = "happy"; moodMode=0; break;
+                moodSwitcher.setImageResource(R.drawable.mood_angry);
+                mood = "angry"; moodMode=0; break;
             default:
-                moodSwitcher.setImageResource(R.drawable.mood_happy);
-                mood = "happy"; moodMode=0; break;
+                moodSwitcher.setImageResource(R.drawable.mood_default);
+                mood = "error"; moodMode=-1; break;
         }
         saveMood(year+"/"+month+"/"+date,mood);
 
@@ -231,8 +237,8 @@ public class MainActivity extends AppCompatActivity {
     {
         Calendar cal = Calendar.getInstance();
         year = cal.get(Calendar.YEAR);
-        month = cal.get(Calendar.MONTH);
-        date = cal.get(Calendar.DATE)+1;
+        month = cal.get(Calendar.MONTH)+1;
+        date = cal.get(Calendar.DATE);
 
         Log.d("Date Error", String.valueOf(month));
 
@@ -336,7 +342,6 @@ public class MainActivity extends AppCompatActivity {
                                 milkTime = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  " ;
                                 txtMilkInfo.setText(milkTime);
                                 milkMode++;
-                                Log.d("__MILKMODE__",String.valueOf(milkMode));
                             }
                         }, mHour, mMinute, false);
                 timePickerDialog.show();
@@ -365,7 +370,6 @@ public class MainActivity extends AppCompatActivity {
                                 Data data1 = new Data("milk", year+"/"+month+"/"+date, milkTime, edtMilkAmount.getText().toString() + " mL");
                                 data1 = database.insertData(data1);
                                 milkMode++;
-                                Log.d("__MILKMODE__", String.valueOf(milkMode));
                             }
                         })
                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -387,8 +391,7 @@ public class MainActivity extends AppCompatActivity {
                                 milkTime = toZeroZero(hourOfDay) + ":" + toZeroZero(minute) + "  " ;
                                 txtMilkInfo.setText(milk+milkTime);
                                 milkMode = 1;
-                                Log.d("__MILKMODE__", String.valueOf(milkMode));
-                            }
+                                                            }
                         }, mHour, mMinute, false);
                 timePickerDialog.show();
             }
@@ -588,7 +591,7 @@ public class MainActivity extends AppCompatActivity {
                                 else
                                     sleep = sleepTime + "\n";
                                 txtSleepInfo.setText(sleep);
-                                saveSleepTime("napTmp", sleepTime);
+                                saveSleepTime("napTmp", year+"/"+month+"/"+date, sleepTime + "\n");
                                 sleepMode++;
                             }
                             else if (sleepMode==2)
@@ -638,7 +641,7 @@ public class MainActivity extends AppCompatActivity {
                                 else
                                     outdoor = outdoorTime + "\n" ;
                                     txtOutdoorInfo.setText(outdoor);
-                                saveOutdoorTime("outdoorTmp", year+"/"+month+"/"+date, outdoorTime);
+                                saveOutdoorTime("outdoorTmp", year+"/"+month+"/"+date, outdoorTime + "\n");
                                 outdoorMode++;
                             }
                             else if (outdoorMode==2)
@@ -681,6 +684,47 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    public View.OnClickListener writeOthers = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            // Get Current Time
+            final Calendar c = Calendar.getInstance();
+            mHour = c.get(Calendar.HOUR_OF_DAY);
+            mMinute = c.get(Calendar.MINUTE);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            // Get the layout inflater
+            LayoutInflater inflater = MainActivity.this.getLayoutInflater();
+
+            // Inflate and set the layout for the dialog
+            // Pass null as the parent view because its going in the dialog layout
+            builder.setView(inflater.inflate(R.layout.other_dialog, null))
+                    // Add action buttons
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            Dialog d = (Dialog) dialog;
+                            EditText edtOtherInfoBox = (EditText) d.findViewById(R.id.otherInfoBox);
+                            if (other!=null)
+                                other = other + edtOtherInfoBox.getText().toString() + "\n";
+                            else
+                                other = edtOtherInfoBox.getText().toString() + "\n";
+                            txtOtherInfo.setText(other);
+                            Data data1 = new Data("other", year+"/"+month+"/"+date, null, other);
+                            data1 = database.insertData(data1);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.dismiss();
+                        }
+                    });
+            builder.create();
+            builder.show();
+        }
+    };
+
+
     // adding zero to the number smaller than 10
     public String toZeroZero (int i) {
         if(i < 10) {
@@ -688,5 +732,109 @@ public class MainActivity extends AppCompatActivity {
         }
         else
             return Integer.toString(i);
+    }
+
+    public void readData (String Date)
+    {
+        Data temp;
+        for (long i = 1; i <= database.getCount(); i++) {
+            temp = database.getData(i);
+            if (temp.getDate() != null) {
+                if (temp.getDate().equals(Date)) {
+                    if (temp.getEvent().equals("mood"))
+                    {
+                        mood = temp.getMark();
+                        switch (mood)
+                        {
+                            case "happy": moodSwitcher.setImageResource(R.drawable.mood_happy); moodMode = 0; break;
+                            case "sad": moodSwitcher.setImageResource(R.drawable.mood_sad); moodMode = 1; break;
+                            case "sick": moodSwitcher.setImageResource(R.drawable.mood_sick); moodMode = 2; break;
+                            case "angry": moodSwitcher.setImageResource(R.drawable.mood_angry); moodMode = 4; break;
+                            case "worried": moodSwitcher.setImageResource(R.drawable.mood_worried); moodMode = 3; break;
+                        }
+                    }
+
+                    else if (temp.getEvent().equals("wake up time"))
+                        txtWakeTime.setText(temp.getMark());
+
+                    else if (temp.getEvent().equals("bed time"))
+                        txtBedTime.setText(temp.getMark());
+
+                    else if (temp.getEvent().equals("milk"))
+                    {
+                        if (milk!=null)
+                            milk = milk + temp.getTime()  + temp.getMark();
+                        else
+                            milk = temp.getTime()  + temp.getMark();
+                        txtMilkInfo.setText(milk);
+                    }
+
+                    else if (temp.getEvent().equals("food"))
+                    {
+                        if (food!=null)
+                            food = food + temp.getTime()  + temp.getMark();
+                        else
+                            food = temp.getTime()  + temp.getMark();
+                        txtFoodInfo.setText(food);
+                    }
+
+                    else if (temp.getEvent().equals("stool"))
+                    {
+                        if (poop!=null)
+                            poop = poop + temp.getTime()  + temp.getMark();
+                        else
+                            poop = temp.getTime()  + temp.getMark();
+                        txtPoopInfo.setText(poop);
+                    }
+
+                    else if (temp.getEvent().equals("nap time"))
+                    {
+                        if (sleep!=null)
+                            sleep = sleep + temp.getMark();
+                        else
+                            sleep = temp.getMark();
+                        txtSleepInfo.setText(sleep);
+                    }
+
+                    else if (temp.getEvent().equals("napTmp"))
+                    {
+                        sleepTime = temp.getMark();
+
+                        if (sleep!=null)
+                            txtSleepInfo.setText(sleep + sleepTime);
+                        else
+                            txtSleepInfo.setText(sleepTime);
+                    }
+
+                    else if (temp.getEvent().equals("outdoor"))
+                    {
+                        if (outdoor!=null)
+                            outdoor = outdoor + temp.getMark();
+                        else
+                            outdoor = temp.getMark();
+                        txtOutdoorInfo.setText(outdoor);
+                    }
+
+                    else if (temp.getEvent().equals("outdoorTmp"))
+                    {
+                        outdoorTime = temp.getMark();
+
+                        if (outdoor!=null)
+                            txtOutdoorInfo.setText(outdoor + outdoorTime);
+                        else
+                            txtOutdoorInfo.setText(outdoorTime);
+                    }
+
+                    else if (temp.getEvent().equals("bath time"))
+                    {
+                        txtBathInfo.setText(temp.getMark());
+                        Log.d("BATH", temp.getMark());
+                    }
+
+                    else if (temp.getEvent().equals("other"))
+                        txtOtherInfo.setText(temp.getMark());
+                }
+            }
+        }
     }
 }

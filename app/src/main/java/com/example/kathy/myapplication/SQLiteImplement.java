@@ -89,7 +89,7 @@ public class SQLiteImplement extends SQLiteOpenHelper {
     public int getCount() {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         int result = 0;
-        Cursor cursor = sqLiteDatabase.rawQuery("SELECT COUNT(*) FROM " + TABLE_NAME, null);
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT MAX(" + COL_1 + ") FROM " + TABLE_NAME, null);
 
         if (cursor.moveToNext())
             result = cursor.getInt(0);

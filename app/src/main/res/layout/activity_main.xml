@@ -52,7 +52,7 @@
                     android:id="@+id/mood"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:src="@drawable/mood_happy"
+                    android:src="@drawable/mood_default"
                     android:layout_marginLeft="25dp"
                     android:layout_marginRight="25dp"
                     android:scaleType="centerCrop"
@@ -84,7 +84,7 @@
                             android:id="@+id/wakeUpTime"
                             android:layout_width="100dp"
                             android:layout_height="50dp"
-                            android:text="09:00"
+                            android:text="--:--"
                             android:textSize="25dp"
                             android:layout_marginLeft="10dp"
                             android:gravity="center"/>
@@ -108,7 +108,7 @@
                             android:id="@+id/bedTime"
                             android:layout_width="100dp"
                             android:layout_height="50dp"
-                            android:text="21:00"
+                            android:text="--:--"
                             android:textSize="25dp"
                             android:layout_marginLeft="10dp"
                             android:gravity="center"/>
@@ -316,6 +316,61 @@
                 android:gravity="center"/>
 
         </LinearLayout>
+
+        <View
+            android:id="@+id/line7"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/bathLayout"
+            android:layout_marginTop="10dp"
+            android:layout_margin="10dp"
+            android:background="#424242" />
+
+        <LinearLayout
+            android:id="@+id/othersLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/line7">
+
+            <ImageView
+                android:id="@+id/others"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/others"
+                android:scaleType="centerCrop"
+                android:layout_marginLeft="12dp"
+                android:layout_gravity="center_vertical"/>
+
+            <TextView
+                android:id="@+id/othersInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"
+                android:layout_marginLeft="25dp"
+                android:textSize="20dp"
+                android:gravity="center"/>
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/line8"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_below="@id/othersLayout"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="30dp"
+            android:layout_margin="10dp"
+            android:background="#424242" />
+
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:text="Send"
+            android:textSize="20dp"
+            android:textAllCaps="true"
+            android:background="#FFFFFF"
+            android:layout_below="@+id/line8"
+            android:layout_centerHorizontal="true"/>
+
 
     </RelativeLayout>
 
